@@ -84,7 +84,7 @@ def fake_marks():
     with (DBSession() as session):
         for cur, student in enumerate(session.query(Student).all()):
             print(f"Filling marks for {student.name} {cur + 1}/50", end="\r")
-            for _ in range(randint(10, 20)):
+            for _ in range(32):
                 subject_id = choice(range(1, 9))
                 tutor_id = (session.query(Subject)
                             .filter_by(id=subject_id)
