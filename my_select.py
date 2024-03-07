@@ -12,8 +12,12 @@ DBSession = sessionmaker(bind=engine)
 def select_1():
     """Select 5 students with the most average marks."""
     with DBSession() as session:
-        res = session.query(Student.name, func.round(func.avg(Mark.mark), 2).label('avg_mark')) \
-            .select_from(Mark).join(Student).group_by(Student.id).order_by(desc('avg_mark')).limit(5).all()
+        res = session.query(Student.name,
+                            func.round(func.avg(Mark.mark), 2)\
+                            .label('avg_mark'))\
+            .select_from(Mark).join(Student) \
+            .group_by(Student.id).order_by(desc('avg_mark')) \
+            .limit(5).all()
         print(res)
         return res
 
@@ -24,10 +28,14 @@ def select_2():
                    'Statistics', 'Python Core', 'Computer Science', 'Algorithms']
     """
     with (DBSession() as session):
-        res = session.query(Student.name, Subject.name, func.round(func.avg(Mark.mark), 2).label("avg_mark")) \
+        res = session.query(Student.name,
+                            Subject.name,
+                            func.round(func.avg(Mark.mark), 2) \
+                            .label("avg_mark")) \
             .select_from(Mark).join(Student).join(Subject) \
             .where(Subject.name == "Machine Learning") \
-            .group_by(Student.id).order_by(desc("avg_mark")).first()
+            .group_by(Student.id) \
+            .order_by(desc("avg_mark")).first()
         print(res)
         return res
 
@@ -35,10 +43,14 @@ def select_2():
 def select_3():
     """Select average mark in groups on in <SUBJECT>.
         SUBJECT = ['Math', 'Data Science', 'HTML+CSS', 'c',
-                   'Statistics', 'Python Core', 'Computer Science', 'Algorithms']
+                   'Statistics', 'Python Core', 'Computer Science',
+                   'Algorithms']
     """
     with (DBSession() as session):
-        res = session.query(Group.name, Subject.name, func.round(func.avg(Mark.mark), 2).label("avg_mark")) \
+        res = session.query(Group.name,
+                            Subject.name,
+                            func.round(func.avg(Mark.mark), 2) \
+                            .label("avg_mark")) \
             .select_from(Mark).join(Subject).join(Student) \
             .join(Group, Group.id == Student.fn_groupid) \
             .where(Subject.name == "Python Core") \
@@ -63,7 +75,8 @@ def select_5():
                  'Ph.D. John Thompson']
     """
     with DBSession() as session:
-        tutor_orm = session.query(Tutor).where(Tutor.name == "Proff. Sherri King").first()
+        tutor_orm = session.query(Tutor) \
+            .where(Tutor.name == "Proff. Sherri King").first()
         res = [_.name for _ in tutor_orm.subjects]
     print(res)
 
@@ -75,7 +88,9 @@ def select_6():
         GROUP = ['Group-1', 'Group-2', 'Group-3']
     """
     with DBSession() as session:
-        group_orm = session.query(Group).where(Group.name == "Group-2").first()
+        group_orm = session.query(Group) \
+            .where(Group.name == "Group-2") \
+            .first()
         students = [_.name for _ in group_orm.students]
     print(students)
 
@@ -85,7 +100,8 @@ def select_6():
 def select_7():
     """Select marks of students in a <GROUP> and a certain <SUBJECT>.
         SUBJECT = ['Math', 'Data Science', 'HTML+CSS', 'c',
-                   'Statistics', 'Python Core', 'Computer Science', 'Algorithms']
+                   'Statistics', 'Python Core', 'Computer Science',
+                   'Algorithms']
         GROUP = ['Group-1', 'Group-2', 'Group-3']
     """
     with DBSession() as session:
@@ -106,7 +122,8 @@ def select_7():
 def select_8():
     """Select average mark of <TUTOR> and <SUBJECT>.
         SUBJECT = ['Math', 'Data Science', 'HTML+CSS', 'c',
-                   'Statistics', 'Python Core', 'Computer Science', 'Algorithms']
+                   'Statistics', 'Python Core', 'Computer Science',
+                   'Algorithms']
         TUTOR = ['Dr. Michael Ortiz', 'Proff. David Deleon',
                  'Proff. Sherri King', 'Ph.D. Dorothy Phillips',
                  'Ph.D. John Thompson']
@@ -139,7 +156,8 @@ def select_9():
 
 
 def select_10():
-    """Select list of courses that are lectured to a certain <STUDENT> by a certain <TUTOR>.
+    """Select list of courses that are lectured to a certain <STUDENT>
+            by a certain <TUTOR>.
         TUTOR = ['Dr. Michael Ortiz', 'Proff. David Deleon',
                      'Proff. Sherri King', 'Ph.D. Dorothy Phillips',
                      'Ph.D. John Thompson']
@@ -149,7 +167,8 @@ def select_10():
                             Tutor.name.label("Tutor"),
                             Subject.name.label("Subject")) \
             .select_from(Mark).join(Student).join(Subject).join(Tutor) \
-            .where(and_(Tutor.name == "Dr. Michael Ortiz", Student.name == "Natalie Cruz")) \
+            .where(and_(Tutor.name == "Dr. Michael Ortiz",
+                        Student.name == "Natalie Cruz")) \
             .group_by(Subject.name).all()
         for _ in res:
             print(_)
@@ -164,7 +183,8 @@ def select_aux_1():
     """
     with DBSession() as session:
         mark = session.query(Tutor.name.label("tutor"),
-                             func.round(func.avg(Mark.mark), 2).label("avg_mark"),
+                             func.round(func.avg(Mark.mark), 2) \
+                             .label("avg_mark"),
                              Student.name.label("student")) \
             .select_from(Mark).join(Student).join(Subject) \
             .join(Tutor, Subject.fn_tutorid == Tutor.id) \
