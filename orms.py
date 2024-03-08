@@ -15,7 +15,7 @@ class Student(Base):
     marks: Mapped[list["Mark"]] = relationship(
         back_populates="student"
     )
-    fn_groupid: Mapped[int] = mapped_column(ForeignKey("groups.id"))
+    fn_groupid: Mapped[int | None] = mapped_column(ForeignKey("groups.id"))
     group: Mapped["Group"] = relationship(
         back_populates="students"
     )
@@ -52,7 +52,7 @@ class Subject(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(nullable=False,
                                       unique=True)
-    fn_tutorid: Mapped[int] = mapped_column(ForeignKey("tutors.id"))
+    fn_tutorid: Mapped[int | None] = mapped_column(ForeignKey("tutors.id"))
     marks: Mapped[list["Mark"]] = relationship(
         back_populates="subject"
     )

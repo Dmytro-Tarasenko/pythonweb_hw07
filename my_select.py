@@ -10,16 +10,23 @@ DBSession = sessionmaker(bind=engine)
 
 
 def select_1():
-    """Select 5 students with the most average marks."""
+    """Select 5 students with the biggest average marks."""
+    fields = ["student", "avg_mark"]
+    students = []
+    StudentRow = namedtuple("StudentRow", *fields)
     with DBSession() as session:
-        res = session.query(Student.name,
-                            func.round(func.avg(Mark.mark), 2)\
-                            .label('avg_mark'))\
+        res_orm = session.query(Student.name,
+                                func.round(func.avg(Mark.mark), 2)
+                                .label('avg_mark'))\
             .select_from(Mark).join(Student) \
             .group_by(Student.id).order_by(desc('avg_mark')) \
             .limit(5).all()
-        print(res)
-        return res
+        print(res_orm)
+        for _ in res_orm:
+            row = StudentRow(*_)
+            print(row)
+            students.append(row)
+        return students
 
 
 def select_2():
@@ -27,17 +34,20 @@ def select_2():
         SUBJECT = ['Math', 'Data Science', 'HTML+CSS', 'c',
                    'Statistics', 'Python Core', 'Computer Science', 'Algorithms']
     """
+    fields = ["student", "subject", "avg_mark"]
+    StudentRow = namedtuple("Studentrow", *fields)
     with (DBSession() as session):
         res = session.query(Student.name,
                             Subject.name,
-                            func.round(func.avg(Mark.mark), 2) \
+                            func.round(func.avg(Mark.mark), 2)\
                             .label("avg_mark")) \
             .select_from(Mark).join(Student).join(Subject) \
             .where(Subject.name == "Machine Learning") \
             .group_by(Student.id) \
             .order_by(desc("avg_mark")).first()
-        print(res)
-        return res
+        ret = StudentRow(*res)
+        print(ret)
+        return ret
 
 
 def select_3():
@@ -46,6 +56,9 @@ def select_3():
                    'Statistics', 'Python Core', 'Computer Science',
                    'Algorithms']
     """
+    fields = ["group", "subject", "avg_mark"]
+    GroupRow = namedtuple("GroupRow", *fields)
+    groups = []
     with (DBSession() as session):
         res = session.query(Group.name,
                             Subject.name,
@@ -56,8 +69,10 @@ def select_3():
             .where(Subject.name == "Python Core") \
             .group_by(Group.id).order_by(desc("avg_mark")).all()
         for _ in res:
-            print(_)
-        return res
+            row = GroupRow(*_)
+            print(row)
+            groups.append(row)
+        return groups
 
 
 def select_4():
@@ -104,6 +119,9 @@ def select_7():
                    'Algorithms']
         GROUP = ['Group-1', 'Group-2', 'Group-3']
     """
+    fields = ["student", "subject", "date", "mark"]
+    MarksRow = namedtuple("MarksRow", *fields)
+    marks = []
     with DBSession() as session:
         res = session.query(Student.name.label("Student"),
                             Subject.name.label("Subject"),
@@ -114,9 +132,10 @@ def select_7():
             .where(Group.name == "Group-3",
                    Subject.name == "Python Core").all()
         for _ in res:
-            print(_)
-
-        return res
+            row = MarksRow(*_)
+            print(row)
+            marks.append(row)
+        return marks
 
 
 def select_8():
@@ -128,6 +147,8 @@ def select_8():
                  'Proff. Sherri King', 'Ph.D. Dorothy Phillips',
                  'Ph.D. John Thompson']
     """
+    fields = ["tutor", "subject", "avg_mark"]
+    MarkRow = namedtuple("MarkRow", *fields)
     with (DBSession() as session):
         res = session.query(Tutor.name.label("Tutor"),
                             Subject.name.label("Subject"),
@@ -137,11 +158,16 @@ def select_8():
             .join(Subject, Mark.fn_subjectid == Subject.id) \
             .filter(and_(Tutor.name == "Dr. Michael Ortiz",
                          Subject.name == "Computer Science")).first()
-        print(res)
+        ret = MarkRow(*res)
+        print(ret)
+        return ret
 
 
 def select_9():
     """Select courses of a certain student."""
+    fields = ["subject", "student"]
+    SubjectRow = namedtuple("SubjectRow", *fields)
+    subjects = []
     with DBSession() as session:
         res = session.query(Subject.name.label("Subject"),
                             Student.name.label("Student")) \
@@ -151,8 +177,11 @@ def select_9():
             .filter(Student.name == "Melissa Garrett") \
             .group_by(Subject.name).all()
         for _ in res:
-            print(_)
-        return res
+            row = SubjectRow(*_)
+            print(row)
+            subjects.append(row)
+
+        return subjects
 
 
 def select_10():
@@ -162,6 +191,9 @@ def select_10():
                      'Proff. Sherri King', 'Ph.D. Dorothy Phillips',
                      'Ph.D. John Thompson']
     """
+    fields = ["student", "tutor", "subject"]
+    CourseRow = namedtuple("CourseRow", *fields)
+    courses = []
     with DBSession() as session:
         res = session.query(Student.name.label("Student"),
                             Tutor.name.label("Tutor"),
@@ -171,8 +203,10 @@ def select_10():
                         Student.name == "Natalie Cruz")) \
             .group_by(Subject.name).all()
         for _ in res:
-            print(_)
-        return res
+            row = CourseRow(*_)
+            print(row)
+            courses.append(row)
+        return courses
 
 
 def select_aux_1():
@@ -181,6 +215,8 @@ def select_aux_1():
                      'Proff. Sherri King', 'Ph.D. Dorothy Phillips',
                      'Ph.D. John Thompson']
     """
+    fields = ["tutor", "avg_mark", "student"]
+    MarkRow = namedtuple("MarkRow", *fields)
     with DBSession() as session:
         mark = session.query(Tutor.name.label("tutor"),
                              func.round(func.avg(Mark.mark), 2) \
@@ -191,6 +227,7 @@ def select_aux_1():
             .where(and_(Tutor.name == "Ph.D. John Thompson",
                         Student.name == "Natalie Cruz")) \
             .group_by(Student.name).first()
+        mark = MarkRow(*mark)
         print(mark)
         return mark
 
@@ -210,7 +247,6 @@ def select_aux_2():
             .where(Group.name == group_name) \
             .group_by(Group.name) \
             .scalar()
-        print("Last class was on:", last_class)
         marks_orm = session.query(Student.name.label("student"),
                                   Subject.name.label("subject"),
                                   Mark.mark,
