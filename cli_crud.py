@@ -11,7 +11,6 @@ from orms import Student, Subject, Tutor, Group, Mark
 engine = create_engine("sqlite:///sqlalchemy.db", echo=False)
 DBSession = sessionmaker(bind=engine)
 
-
 CRUD_HANDLERS = {}
 
 
@@ -31,15 +30,21 @@ def make_namedtuple(fields: list[str],
                     values: Collection,
                     name: str = "ResultRow") -> Any:
     if len(fields) != len(values):
-        raise IndexError(f"Number of fields {len(fields)} must be equal to"
+        raise ValueError(f"Number of fields {len(fields)} must be equal to"
                          + f" number of values (actually is {len(values)})")
     cls = namedtuple(name, fields)
     return cls(*values)
 
 
 @register_handler(action="create")
-def create():
-    pass
+def create(arguments: argparse.Namespace):
+    model = arguments.model.lower().capitalize()
+    name = arguments.name
+    if name is None:
+        print(f"Name is obligatory for adding data to {model}!")
+        return
+    with DBSession() as session:
+        res = session.query(name)
 
 
 @register_handler(action="show")
