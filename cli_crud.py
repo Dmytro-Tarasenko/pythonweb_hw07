@@ -13,6 +13,14 @@ DBSession = sessionmaker(bind=engine)
 
 CRUD_HANDLERS = {}
 
+MODELS = {
+    "student": Student,
+    "subject": Subject,
+    "tutor": Tutor,
+    "group": Group,
+    "mark": Mark
+}
+
 
 def register_handler(action: str):
     def factory(handler: Callable):
@@ -38,13 +46,17 @@ def make_namedtuple(fields: list[str],
 
 @register_handler(action="create")
 def create(arguments: argparse.Namespace):
-    model = arguments.model.lower().capitalize()
+    model_name = arguments.model.lower()
+    Model = MODELS[model_name]
     name = arguments.name
     if name is None:
-        print(f"Name is obligatory for adding data to {model}!")
+        print(f"Name is obligatory for adding data to {model_name.capitalize()}!")
         return
     with DBSession() as session:
-        res = session.query(name)
+        res = session.query(Model.name).select_from(Model).where(Model.name == name).first()
+        if res:
+            print(f"{name} already exists in {model_name.capitalize()}")
+            return
 
 
 @register_handler(action="show")
