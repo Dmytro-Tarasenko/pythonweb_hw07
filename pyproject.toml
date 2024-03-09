@@ -6,7 +6,7 @@ authors = ["Dmytro-Tarasenko <ug.dotenko@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 sqlalchemy = "^2.0.28"
 rich = "^13.7.1"
 faker = "^24.0.0"
